@@ -1,5 +1,5 @@
 # ProxyChecker
-An HTTPS proxy checker made in Go.
+A multi-threaded HTTPS proxy checker made in Go.
 ## Requirements
 * Go (latest)
 

@@ -5,7 +5,7 @@ A multi-threaded HTTPS proxy checker made in Go.
 
 ## Building
 ```
-go build ./src/hunter
+go build ./src/checker
 ```
 
 ## Setup

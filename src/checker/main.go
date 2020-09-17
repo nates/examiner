@@ -15,7 +15,7 @@ var(
 )
 
 func main() {
-	fill()
+	fillPool()
 
 	threads := flag.Int("threads", 100, "Amount of threads to check with.")
 	flag.Parse()
@@ -34,19 +34,19 @@ func main() {
 	wg.Wait()
 
 	fmt.Println(strconv.Itoa(len(working)) + " working proxies.")
-	f, err := os.Create("working.txt")
+	file, err := os.Create("working.txt")
     if err != nil {
         fmt.Println(err)
         return
     }
-    _, err = f.WriteString(strings.Join(working, "\n"))
+    _, err = file.WriteString(strings.Join(working, "\n"))
     if err != nil {
         fmt.Println(err)
-        f.Close()
+        file.Close()
         return
 	}
 	fmt.Println("Wrote proxies to working.txt")
-    err = f.Close()
+    err = file.Close()
     if err != nil {
         fmt.Println(err)
         return

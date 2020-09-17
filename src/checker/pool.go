@@ -1,6 +1,6 @@
 package main
 
-import(
+import (
 	"bufio"
 	"errors"
 	"os"
@@ -10,7 +10,7 @@ var(
 	pool = []string{}
 )
 
-func fill() error {
+func fillPool() error {
 	file, err := os.Open("proxies.txt")
  
 	if err != nil {

@@ -16,7 +16,7 @@ Put your unchecked HTTPS proxies in proxies.txt like below:
 1.2.3.4:443
 ```
 
-## Running
+## Usage
 ```
 ./checker.exe -threads [integer default=100]
 ```

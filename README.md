@@ -18,5 +18,5 @@ Put your unchecked HTTPS proxies in proxies.txt like below:
 
 ## Usage
 ```
-./checker.exe -threads=300
+./checker.exe -threads=300 -type=[https | socks5]
 ```

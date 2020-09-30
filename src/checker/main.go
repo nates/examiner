@@ -18,6 +18,7 @@ func main() {
 	fillPool()
 
 	threads := flag.Int("threads", 100, "Amount of threads to check with.")
+	proxyType := flag.String("type", "https", "Type of proxies [https | socks5]")
 	flag.Parse()
 	if *threads <= 0 {
 		fmt.Println("Invalid amount of threads.")
@@ -28,7 +29,7 @@ func main() {
 
 	for i := 0; i <= *threads; i++ {
 		wg.Add(1)
-		go worker(i, &wg)
+		go worker(i, &wg, proxyType)
 	}
 
 	wg.Wait()
@@ -53,7 +54,7 @@ func main() {
     }
 }
 
-func worker(id int, wg *sync.WaitGroup) {
+func worker(id int, wg *sync.WaitGroup, proxyType *string) {
 	proxy, err := getProxy()
 	if err != nil {
 		if(err.Error() == "Pool is empty.") {
@@ -64,22 +65,22 @@ func worker(id int, wg *sync.WaitGroup) {
 	regexMatch, err := regexp.MatchString(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d{1,5})`, proxy)
 	if err != nil {
 		fmt.Println("[" + strconv.Itoa(id) + "]", err.Error())
-		worker(id, wg)
+		worker(id, wg, proxyType)
 		return
 	}
 	if regexMatch != true {
 		fmt.Println("[" + strconv.Itoa(id) + "]", "Invalid IP.")
-		worker(id, wg)
+		worker(id, wg, proxyType)
 		return
 	}
-	_, speed, err := check(strings.Split(proxy, ":")[0], strings.Split(proxy, ":")[1])
+	_, speed, err := check(strings.Split(proxy, ":")[0], strings.Split(proxy, ":")[1], proxyType)
 	if err != nil {
 		fmt.Println("[" + strconv.Itoa(id) + "]", err.Error())
-		worker(id, wg)
+		worker(id, wg, proxyType)
 		return
 	}
 	fmt.Println("[" + strconv.Itoa(id) + "]", "Working proxy, Speed: " + strconv.Itoa(speed) + "ms")
 	working = append(working, proxy)
-	worker(id, wg)
+	worker(id, wg, proxyType)
 	return
 }

@@ -1,5 +1,5 @@
 # ProxyChecker
-A multi-threaded HTTPS proxy checker made in Go.
+A multi-threaded HTTPS and SOCKS5 proxy checker made in Go.
 ## Requirements
 * Go (latest)
 
@@ -9,7 +9,7 @@ go build ./src/checker
 ```
 
 ## Setup
-Put your unchecked HTTPS proxies in proxies.txt like below:
+Put your unchecked HTTPS or SOCKS5 proxies in proxies.txt like below:
 ```
 1.2.3.4:8080
 1.2.3.4:80

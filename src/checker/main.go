@@ -18,7 +18,7 @@ func main() {
 	fillPool()
 
 	threads := flag.Int("threads", 100, "Amount of threads to check with.")
-	proxyType := flag.String("type", "https", "Type of proxies [https | socks5]")
+	proxyType := flag.String("type", "https", "Type of proxies [https | socks5 | socks4]")
 	flag.Parse()
 	if *threads <= 0 {
 		fmt.Println("Invalid amount of threads.")

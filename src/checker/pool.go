@@ -10,8 +10,8 @@ var(
 	pool = []string{}
 )
 
-func fillPool() error {
-	file, err := os.Open("proxies.txt")
+func fillPool(path *string) error {
+	file, err := os.Open(*path)
  
 	if err != nil {
 		return errors.New("Error reading proxies.txt.")

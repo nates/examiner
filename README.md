@@ -19,5 +19,5 @@ Put your unchecked proxies in proxies.txt like below:
 
 ## Usage
 ```
-./checker.exe -threads=300 -type=[https | socks5 | socks4]
+./checker.exe -threads=300 -type=[https | socks5 | socks4] -url=https://google.com/ -text=google -timeout=5
 ```

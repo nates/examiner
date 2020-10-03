@@ -15,11 +15,17 @@ var(
 )
 
 func main() {
-	fillPool()
-
 	threads := flag.Int("threads", 100, "Amount of threads to check with.")
+	timeout := flag.Int("timeout", 5, "Timeout in seconds.")
+	url := flag.String("url", "https://api.ipify.org", "URL to check proxies with. (Requires text option)")
+	text := flag.String("text", "", "If this text is found on the page, the proxy will be marked good. (IF left empty it will default to the proxy IP address.)")
 	proxyType := flag.String("type", "https", "Type of proxies [https | socks5 | socks4]")
+	input := flag.String("input", "proxies.txt", "File to check")
+	output := flag.String("output", "working.txt", "File to output proxies")
 	flag.Parse()
+
+	fillPool(input)
+
 	if *threads <= 0 {
 		fmt.Println("Invalid amount of threads.")
 		return
@@ -27,15 +33,15 @@ func main() {
  
 	var wg sync.WaitGroup
 
-	for i := 0; i <= *threads; i++ {
+	for i := 1; i <= *threads; i++ {
 		wg.Add(1)
-		go worker(i, &wg, proxyType)
+		go worker(i, &wg, proxyType, timeout, url, text)
 	}
 
 	wg.Wait()
 
 	fmt.Println(strconv.Itoa(len(working)) + " working proxies.")
-	file, err := os.Create("working.txt")
+	file, err := os.Create(*output)
     if err != nil {
         fmt.Println(err)
         return
@@ -46,7 +52,7 @@ func main() {
         file.Close()
         return
 	}
-	fmt.Println("Wrote proxies to working.txt")
+	fmt.Println("Wrote proxies to " + *output)
     err = file.Close()
     if err != nil {
         fmt.Println(err)
@@ -54,7 +60,7 @@ func main() {
     }
 }
 
-func worker(id int, wg *sync.WaitGroup, proxyType *string) {
+func worker(id int, wg *sync.WaitGroup, proxyType *string, timeout *int, url *string, text *string) {
 	proxy, err := getProxy()
 	if err != nil {
 		if(err.Error() == "Pool is empty.") {
@@ -65,22 +71,22 @@ func worker(id int, wg *sync.WaitGroup, proxyType *string) {
 	regexMatch, err := regexp.MatchString(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d{1,5})`, proxy)
 	if err != nil {
 		fmt.Println("[" + strconv.Itoa(id) + "]", err.Error())
-		worker(id, wg, proxyType)
+		worker(id, wg, proxyType, timeout, url, text)
 		return
 	}
 	if regexMatch != true {
 		fmt.Println("[" + strconv.Itoa(id) + "]", "Invalid IP.")
-		worker(id, wg, proxyType)
+		worker(id, wg, proxyType, timeout, url, text)
 		return
 	}
-	_, speed, err := check(strings.Split(proxy, ":")[0], strings.Split(proxy, ":")[1], proxyType)
+	speed, err := check(strings.Split(proxy, ":")[0], strings.Split(proxy, ":")[1], proxyType, timeout, url, text)
 	if err != nil {
 		fmt.Println("[" + strconv.Itoa(id) + "]", err.Error())
-		worker(id, wg, proxyType)
+		worker(id, wg, proxyType, timeout, url, text)
 		return
 	}
 	fmt.Println("[" + strconv.Itoa(id) + "]", "Working proxy, Speed: " + strconv.Itoa(speed) + "ms")
 	working = append(working, proxy)
-	worker(id, wg, proxyType)
+	worker(id, wg, proxyType, timeout, url, text)
 	return
 }

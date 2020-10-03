@@ -6,10 +6,15 @@ import (
 	"io/ioutil"
 	"errors"
 	"time"
+	"strings"
 	"h12.io/socks"
 )
 
-func check(ip string, port string, proxyType *string) (string, int, error) {
+func check(ip string, port string, proxyType *string, proxyTimeout *int, proxyUrl *string, proxyText *string) (int, error) {
+	var text = ip
+	if *proxyText != "" {
+		text = *proxyText
+	}
 	if *proxyType == "socks5" {
 		start := time.Now()
 		dial := socks.Dial("socks5://" + ip + ":" + port)
@@ -18,22 +23,22 @@ func check(ip string, port string, proxyType *string) (string, int, error) {
 		}
 		client := &http.Client{
 			Transport: transport,
-			Timeout: 5 * time.Second,
+			Timeout: time.Duration(*proxyTimeout) * time.Second,
 		}
-		response, err := client.Get("https://api.ipify.org")
+		response, err := client.Get(*proxyUrl)
 		if err != nil {
-			return "", 0, errors.New("Error requesting ipify.org.")
+			return 0, errors.New("Error requesting " + *proxyUrl)
 		}
 		defer response.Body.Close()
 		body, err := ioutil.ReadAll(response.Body)
 		if err != nil {
-			return "", 0, errors.New("Error reading body.")
+			return 0, errors.New("Error reading body.")
 		}
-		if string(body) != ip {
-			return "", 0, errors.New("Invalid proxy.")
+		if !strings.Contains(string(body), text) {
+			return 0, errors.New("Invalid proxy.")
 		}
 		elapsed := time.Now().Sub(start)
-		return string(body), int(elapsed / time.Millisecond), nil
+		return int(elapsed / time.Millisecond), nil
 	} else if *proxyType == "socks4" {
 		start := time.Now()
 		dial := socks.Dial("socks4://" + ip + ":" + port)
@@ -42,49 +47,49 @@ func check(ip string, port string, proxyType *string) (string, int, error) {
 		}
 		client := &http.Client{
 			Transport: transport,
-			Timeout: 5 * time.Second,
+			Timeout: time.Duration(*proxyTimeout) * time.Second,
 		}
-		response, err := client.Get("https://api.ipify.org")
+		response, err := client.Get(*proxyUrl)
 		if err != nil {
-			return "", 0, errors.New("Error requesting ipify.org.")
+			return 0, errors.New("Error requesting " + *proxyUrl)
 		}
 		defer response.Body.Close()
 		body, err := ioutil.ReadAll(response.Body)
 		if err != nil {
-			return "", 0, errors.New("Error reading body.")
+			return 0, errors.New("Error reading body.")
 		}
-		if string(body) != ip {
-			return "", 0, errors.New("Invalid proxy.")
+		if !strings.Contains(string(body), text) {
+			return 0, errors.New("Invalid proxy.")
 		}
 		elapsed := time.Now().Sub(start)
-		return string(body), int(elapsed / time.Millisecond), nil
+		return int(elapsed / time.Millisecond), nil
 	} else {
 		start := time.Now()
 		url := url.URL{}
 		proxy, err := url.Parse("http://" + ip + ":" + port)
 		if err != nil {
-			return "", 0, errors.New("Error parsing proxy.")
+			return 0, errors.New("Error parsing proxy.")
 		}
 		transport := &http.Transport{
 			Proxy: http.ProxyURL(proxy),
 		}
 		client := &http.Client{
 			Transport: transport,
-			Timeout: 5 * time.Second,
+			Timeout: time.Duration(*proxyTimeout) * time.Second,
 		}
-		response, err := client.Get("https://api.ipify.org")
+		response, err := client.Get(*proxyUrl)
 		if err != nil {
-			return "", 0, errors.New("Error requesting ipify.org.")
+			return 0, errors.New("Error requesting " + *proxyUrl)
 		}
 		defer response.Body.Close()
 		body, err := ioutil.ReadAll(response.Body)
 		if err != nil {
-			return "", 0, errors.New("Error reading body.")
+			return 0, errors.New("Error reading body.")
 		}
-		if string(body) != ip {
-			return "", 0, errors.New("Invalid proxy.")
+		if !strings.Contains(string(body), text) {
+			return 0, errors.New("Invalid proxy.")
 		}
 		elapsed := time.Now().Sub(start)
-		return string(body), int(elapsed / time.Millisecond), nil
+		return int(elapsed / time.Millisecond), nil
 	}
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"strings"
-	"regexp"
 	"sync"
 	"strconv"
 	"os"
@@ -67,17 +66,6 @@ func worker(id int, wg *sync.WaitGroup, proxyType *string, timeout *int, url *st
 			wg.Done()
 			return
 		}
-	}
-	regexMatch, err := regexp.MatchString(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d{1,5})`, proxy)
-	if err != nil {
-		fmt.Println("[" + strconv.Itoa(id) + "]", err.Error())
-		worker(id, wg, proxyType, timeout, url, text)
-		return
-	}
-	if regexMatch != true {
-		fmt.Println("[" + strconv.Itoa(id) + "]", "Invalid IP.")
-		worker(id, wg, proxyType, timeout, url, text)
-		return
 	}
 	speed, err := check(strings.Split(proxy, ":")[0], strings.Split(proxy, ":")[1], proxyType, timeout, url, text)
 	if err != nil {

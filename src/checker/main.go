@@ -67,7 +67,13 @@ func worker(id int, wg *sync.WaitGroup, proxyType *string, timeout *int, url *st
 			return
 		}
 	}
-	speed, err := check(strings.Split(proxy, ":")[0], strings.Split(proxy, ":")[1], proxyType, timeout, url, text)
+	proxySplit := strings.Split(proxy, ":")
+	if len(proxySplit) != 2 {
+		fmt.Println("[" + strconv.Itoa(id) + "]", "Invalid proxy.")
+		worker(id, wg, proxyType, timeout, url, text)
+		return
+	}
+	speed, err := check(proxySplit[0], proxySplit[1], proxyType, timeout, url, text)
 	if err != nil {
 		fmt.Println("[" + strconv.Itoa(id) + "]", err.Error())
 		worker(id, wg, proxyType, timeout, url, text)

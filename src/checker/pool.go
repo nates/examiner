@@ -30,17 +30,13 @@ func fillPool(path *string) error {
 }
 
 func getProxy() (string, error) {
-	i := len(pool) - 1
-
-	if(i <= 0) {
+	if len(pool) == 0 {
 		return "", errors.New("Pool is empty.")
 	}
 
-	proxy := pool[i]
-
-	pool[i] = pool[len(pool)-1]
-	pool[len(pool)-1] = ""
-	pool = pool[:len(pool)-1]
+	proxy := pool[len(pool) - 1]
+	pool[len(pool) - 1] = ""
+	pool = pool[:len(pool) - 1]
 
 	return proxy, nil
 }

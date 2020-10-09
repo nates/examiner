@@ -1,19 +1,24 @@
 package main
 
 import (
+	"errors"
+	"io/ioutil"
 	"net/http"
 	"net/url"
-	"io/ioutil"
-	"errors"
-	"time"
 	"strings"
+	"time"
+
 	"h12.io/socks"
 )
 
-func check(ip string, port string, proxyType *string, proxyTimeout *int, proxyUrl *string, proxyText *string) (int, error) {
+func check(ip string, port string, proxyType *string, proxyTimeout *int, proxyUrl *string, proxyText *string, proxyNotext *string) (int, error) {
 	var text = ip
+	var notext = ""
 	if *proxyText != "" {
 		text = *proxyText
+	}
+	if *proxyNotext != "" {
+		notext = *proxyNotext
 	}
 	if *proxyType == "socks5" {
 		start := time.Now()
@@ -23,7 +28,7 @@ func check(ip string, port string, proxyType *string, proxyTimeout *int, proxyUr
 		}
 		client := &http.Client{
 			Transport: transport,
-			Timeout: time.Duration(*proxyTimeout) * time.Second,
+			Timeout:   time.Duration(*proxyTimeout) * time.Second,
 		}
 		response, err := client.Get(*proxyUrl)
 		if err != nil {
@@ -47,7 +52,7 @@ func check(ip string, port string, proxyType *string, proxyTimeout *int, proxyUr
 		}
 		client := &http.Client{
 			Transport: transport,
-			Timeout: time.Duration(*proxyTimeout) * time.Second,
+			Timeout:   time.Duration(*proxyTimeout) * time.Second,
 		}
 		response, err := client.Get(*proxyUrl)
 		if err != nil {
@@ -75,7 +80,7 @@ func check(ip string, port string, proxyType *string, proxyTimeout *int, proxyUr
 		}
 		client := &http.Client{
 			Transport: transport,
-			Timeout: time.Duration(*proxyTimeout) * time.Second,
+			Timeout:   time.Duration(*proxyTimeout) * time.Second,
 		}
 		response, err := client.Get(*proxyUrl)
 		if err != nil {
@@ -85,6 +90,11 @@ func check(ip string, port string, proxyType *string, proxyTimeout *int, proxyUr
 		body, err := ioutil.ReadAll(response.Body)
 		if err != nil {
 			return 0, errors.New("Error reading body.")
+		}
+		if notext != "" {
+			if strings.Contains(string(body), notext) {
+				return 0, errors.New("Invalid proxy.")
+			}
 		}
 		if !strings.Contains(string(body), text) {
 			return 0, errors.New("Invalid proxy.")

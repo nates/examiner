@@ -39,6 +39,11 @@ func check(ip string, port string, proxyType string, proxyTimeout *int, proxyUrl
 		if err != nil {
 			return 0, errors.New("Error reading body.")
 		}
+		if notext != "" {
+			if strings.Contains(string(body), notext) {
+				return 0, errors.New("Invalid proxy.")
+			}
+		}
 		if !strings.Contains(string(body), text) {
 			return 0, errors.New("Invalid proxy.")
 		}
@@ -62,6 +67,11 @@ func check(ip string, port string, proxyType string, proxyTimeout *int, proxyUrl
 		body, err := ioutil.ReadAll(response.Body)
 		if err != nil {
 			return 0, errors.New("Error reading body.")
+		}
+		if notext != "" {
+			if strings.Contains(string(body), notext) {
+				return 0, errors.New("Invalid proxy.")
+			}
 		}
 		if !strings.Contains(string(body), text) {
 			return 0, errors.New("Invalid proxy.")

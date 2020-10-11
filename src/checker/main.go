@@ -11,6 +11,9 @@ import (
 
 var (
 	working = []string{}
+	https   = []string{}
+	socks4  = []string{}
+	socks5  = []string{}
 )
 
 func main() {
@@ -26,6 +29,20 @@ func main() {
 
 	fillPool(input)
 
+	types := strings.Split(*proxyType, ",")
+
+	if len(types) > 3 {
+		fmt.Println("Invalid amount of types.")
+		return
+	}
+
+	for i := 0; i < len(types); i++ {
+		if types[i] != "https" && types[i] != "socks4" && types[i] != "socks5" {
+			fmt.Println("Invalid type of proxy.")
+			return
+		}
+	}
+
 	if *threads <= 0 {
 		fmt.Println("Invalid amount of threads.")
 		return
@@ -35,32 +52,67 @@ func main() {
 
 	for i := 1; i <= *threads; i++ {
 		wg.Add(1)
-		go worker(i, &wg, proxyType, timeout, url, text, notext)
+		go worker(i, &wg, types, timeout, url, text, notext)
 	}
 
 	wg.Wait()
 
-	fmt.Println(strconv.Itoa(len(working)) + " working proxies.")
-	file, err := os.Create(*output)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	_, err = file.WriteString(strings.Join(working, "\n"))
-	if err != nil {
-		fmt.Println(err)
-		file.Close()
-		return
-	}
-	fmt.Println("Wrote proxies to " + *output)
-	err = file.Close()
-	if err != nil {
-		fmt.Println(err)
-		return
+	if len(types) == 1 {
+		file, err := os.Create(*output)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		_, err = file.WriteString(strings.Join(working, "\n"))
+		if err != nil {
+			fmt.Println(err)
+			file.Close()
+			return
+		}
+		fmt.Println("Wrote proxies to " + *output)
+		err = file.Close()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	} else {
+		for _, v := range types {
+			filename := ""
+			array := []string{}
+			if v == "https" {
+				array = https
+				filename = "https.txt"
+			}
+			if v == "socks5" {
+				array = socks5
+				filename = "socks5.txt"
+			}
+			if v == "socks4" {
+				array = socks4
+				filename = "socks4.txt"
+			}
+			file, err := os.Create(filename)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			_, err = file.WriteString(strings.Join(array, "\n"))
+			if err != nil {
+				fmt.Println(err)
+				file.Close()
+				return
+			}
+			fmt.Println("Wrote proxies to " + filename)
+			err = file.Close()
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		}
 	}
 }
 
-func worker(id int, wg *sync.WaitGroup, proxyType *string, timeout *int, url *string, text *string, notext *string) {
+func worker(id int, wg *sync.WaitGroup, proxyType []string, timeout *int, url *string, text *string, notext *string) {
 	proxy, err := getProxy()
 	if err != nil {
 		if err.Error() == "Pool is empty." {
@@ -74,14 +126,23 @@ func worker(id int, wg *sync.WaitGroup, proxyType *string, timeout *int, url *st
 		worker(id, wg, proxyType, timeout, url, text, notext)
 		return
 	}
-	speed, err := check(proxySplit[0], proxySplit[1], proxyType, timeout, url, text, notext)
-	if err != nil {
-		fmt.Println("["+strconv.Itoa(id)+"]", err.Error())
-		worker(id, wg, proxyType, timeout, url, text, notext)
-		return
+	for _, v := range proxyType {
+		speed, err := check(proxySplit[0], proxySplit[1], v, timeout, url, text, notext)
+		if err != nil {
+			fmt.Println("["+strconv.Itoa(id)+"]", err.Error())
+		} else {
+			fmt.Println("["+strconv.Itoa(id)+"]", "Working proxy, Speed: "+strconv.Itoa(speed)+"ms")
+			if len(proxyType) == 1 {
+				working = append(working, proxy)
+			} else if v == "https" {
+				https = append(https, proxy)
+			} else if v == "socks4" {
+				socks4 = append(socks4, proxy)
+			} else if v == "socks5" {
+				socks5 = append(socks5, proxy)
+			}
+		}
 	}
-	fmt.Println("["+strconv.Itoa(id)+"]", "Working proxy, Speed: "+strconv.Itoa(speed)+"ms")
-	working = append(working, proxy)
 	worker(id, wg, proxyType, timeout, url, text, notext)
 	return
 }

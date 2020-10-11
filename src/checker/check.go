@@ -11,7 +11,7 @@ import (
 	"h12.io/socks"
 )
 
-func check(ip string, port string, proxyType *string, proxyTimeout *int, proxyUrl *string, proxyText *string, proxyNotext *string) (int, error) {
+func check(ip string, port string, proxyType string, proxyTimeout *int, proxyUrl *string, proxyText *string, proxyNotext *string) (int, error) {
 	var text = ip
 	var notext = ""
 	if *proxyText != "" {
@@ -20,7 +20,7 @@ func check(ip string, port string, proxyType *string, proxyTimeout *int, proxyUr
 	if *proxyNotext != "" {
 		notext = *proxyNotext
 	}
-	if *proxyType == "socks5" {
+	if proxyType == "socks5" {
 		start := time.Now()
 		dial := socks.Dial("socks5://" + ip + ":" + port)
 		transport := &http.Transport{
@@ -44,7 +44,7 @@ func check(ip string, port string, proxyType *string, proxyTimeout *int, proxyUr
 		}
 		elapsed := time.Now().Sub(start)
 		return int(elapsed / time.Millisecond), nil
-	} else if *proxyType == "socks4" {
+	} else if proxyType == "socks4" {
 		start := time.Now()
 		dial := socks.Dial("socks4://" + ip + ":" + port)
 		transport := &http.Transport{

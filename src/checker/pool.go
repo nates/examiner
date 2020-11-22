@@ -8,11 +8,11 @@ import (
 
 var pool = []string{}
 
-func fillPool(path *string) error {
-	file, err := os.Open(*path)
+func fillPool(path string) error {
+	file, err := os.Open(path)
 
 	if err != nil {
-		return errors.New("Error reading proxies.txt.")
+		return errors.New("could not open " + path)
 	}
 
 	scanner := bufio.NewScanner(file)
@@ -29,7 +29,7 @@ func fillPool(path *string) error {
 
 func getProxy() (string, error) {
 	if len(pool) == 0 {
-		return "", errors.New("Pool is empty.")
+		return "", errors.New("pool is empty")
 	}
 
 	proxy := pool[len(pool)-1]

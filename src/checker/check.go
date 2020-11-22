@@ -11,14 +11,14 @@ import (
 	"h12.io/socks"
 )
 
-func check(ip string, port string, proxyType string, proxyTimeout *int, proxyUrl *string, proxyText *string, proxyNotext *string) (int, error) {
+func check(ip string, port string, proxyType string, proxyTimeout int, proxyURL string, proxyText string, proxyNotext string) (int, error) {
 	var text = ip
 	var notext = ""
-	if *proxyText != "" {
-		text = *proxyText
+	if proxyText != "" {
+		text = proxyText
 	}
-	if *proxyNotext != "" {
-		notext = *proxyNotext
+	if proxyNotext != "" {
+		notext = proxyNotext
 	}
 	if proxyType == "socks5" {
 		start := time.Now()
@@ -28,24 +28,24 @@ func check(ip string, port string, proxyType string, proxyTimeout *int, proxyUrl
 		}
 		client := &http.Client{
 			Transport: transport,
-			Timeout:   time.Duration(*proxyTimeout) * time.Second,
+			Timeout:   time.Duration(proxyTimeout) * time.Second,
 		}
-		response, err := client.Get(*proxyUrl)
+		response, err := client.Get(proxyURL)
 		if err != nil {
-			return 0, errors.New("Error requesting " + *proxyUrl)
+			return 0, errors.New("Error requesting " + proxyURL)
 		}
 		defer response.Body.Close()
 		body, err := ioutil.ReadAll(response.Body)
 		if err != nil {
-			return 0, errors.New("Error reading body.")
+			return 0, errors.New("could not read body")
 		}
 		if notext != "" {
 			if strings.Contains(string(body), notext) {
-				return 0, errors.New("Invalid proxy.")
+				return 0, errors.New("bad proxy")
 			}
 		}
 		if !strings.Contains(string(body), text) {
-			return 0, errors.New("Invalid proxy.")
+			return 0, errors.New("bad proxy")
 		}
 		elapsed := time.Now().Sub(start)
 		return int(elapsed / time.Millisecond), nil
@@ -57,24 +57,24 @@ func check(ip string, port string, proxyType string, proxyTimeout *int, proxyUrl
 		}
 		client := &http.Client{
 			Transport: transport,
-			Timeout:   time.Duration(*proxyTimeout) * time.Second,
+			Timeout:   time.Duration(proxyTimeout) * time.Second,
 		}
-		response, err := client.Get(*proxyUrl)
+		response, err := client.Get(proxyURL)
 		if err != nil {
-			return 0, errors.New("Error requesting " + *proxyUrl)
+			return 0, errors.New("Error requesting " + proxyURL)
 		}
 		defer response.Body.Close()
 		body, err := ioutil.ReadAll(response.Body)
 		if err != nil {
-			return 0, errors.New("Error reading body.")
+			return 0, errors.New("could not read body")
 		}
 		if notext != "" {
 			if strings.Contains(string(body), notext) {
-				return 0, errors.New("Invalid proxy.")
+				return 0, errors.New("bad proxy")
 			}
 		}
 		if !strings.Contains(string(body), text) {
-			return 0, errors.New("Invalid proxy.")
+			return 0, errors.New("bad proxy")
 		}
 		elapsed := time.Now().Sub(start)
 		return int(elapsed / time.Millisecond), nil
@@ -83,31 +83,31 @@ func check(ip string, port string, proxyType string, proxyTimeout *int, proxyUrl
 		url := url.URL{}
 		proxy, err := url.Parse("http://" + ip + ":" + port)
 		if err != nil {
-			return 0, errors.New("Error parsing proxy.")
+			return 0, errors.New("bad proxy")
 		}
 		transport := &http.Transport{
 			Proxy: http.ProxyURL(proxy),
 		}
 		client := &http.Client{
 			Transport: transport,
-			Timeout:   time.Duration(*proxyTimeout) * time.Second,
+			Timeout:   time.Duration(proxyTimeout) * time.Second,
 		}
-		response, err := client.Get(*proxyUrl)
+		response, err := client.Get(proxyURL)
 		if err != nil {
-			return 0, errors.New("Error requesting " + *proxyUrl)
+			return 0, errors.New("Error requesting " + proxyURL)
 		}
 		defer response.Body.Close()
 		body, err := ioutil.ReadAll(response.Body)
 		if err != nil {
-			return 0, errors.New("Error reading body.")
+			return 0, errors.New("could not read body")
 		}
 		if notext != "" {
 			if strings.Contains(string(body), notext) {
-				return 0, errors.New("Invalid proxy.")
+				return 0, errors.New("bad proxy")
 			}
 		}
 		if !strings.Contains(string(body), text) {
-			return 0, errors.New("Invalid proxy.")
+			return 0, errors.New("bad proxy")
 		}
 		elapsed := time.Now().Sub(start)
 		return int(elapsed / time.Millisecond), nil

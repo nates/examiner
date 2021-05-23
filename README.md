@@ -1,4 +1,4 @@
-# 💻 ProxyChecker
+# 💻 examiner
 A multi-threaded proxy checker made in Go. 
 ## 🧳 Requirements
 * Go (latest)

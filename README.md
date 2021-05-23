@@ -6,11 +6,11 @@ A multi-threaded proxy checker made in Go.
 ## 🏗️ Building
 ```
 go get -u "h12.io/socks"
-go build ./src/checker
+go build ./src/examiner
 ```
 
 ## 🕹️ Usage
 Put your proxies into proxies.txt separated by each line.
 ```
-./checker.exe -threads=300 -type=[https | socks5 | socks4] -url=https://google.com/ -text=google -timeout=5
+./examiner.exe -threads=300 -type=[https | socks5 | socks4] -url=https://google.com/ -text=google -timeout=5
 ```
